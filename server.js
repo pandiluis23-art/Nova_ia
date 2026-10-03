@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_Key });
 
 const SYSTEM_INSTRUCTION = `
 Eres Nova, una NPC inteligente dentro de un juego de Roblox creado por Luis Manuel. 
