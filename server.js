@@ -11,7 +11,7 @@ app.post('/chat', async (req, res) => {
         const { player, message } = req.body;
         
         // Usamos gemini-2.0-flash para evitar errores 404
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const prompt = `Eres Nova, un NPC inteligente en un juego de Roblox. Un jugador llamado ${player} te ha dicho: "${message}". Responde de forma amigable, corta y adaptada a un chat de juego.`;
 
