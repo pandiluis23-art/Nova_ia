@@ -1,23 +1,25 @@
 import express from 'express';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const app = express();
 app.use(express.json());
 
-// Inicializa la SDK usando la variable de entorno GEMINI_API_KEY
-const ai = new GoogleGenAI();
+// Inicializa con la variable de entorno GEMINI_API_KEY
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/chat', async (req, res) => {
     try {
         const { player, message } = req.body;
         
-        // Usamos el modelo estándar actual
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `Eres Nova, un NPC inteligente en un juego de Roblox. Un jugador llamado ${player} te ha dicho: "${message}". Responde de forma amigable, corta y adaptada a un chat de juego.`,
-        });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        res.json({ reply: response.text });
+        const prompt = `Eres Nova, un NPC inteligente en un juego de Roblox. Un jugador llamado ${player} te ha dicho: "${message}". Responde de forma amigable, corta y adaptada a un chat de juego.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        res.json({ reply: text });
     } catch (error) {
         console.error("Error al generar contenido con Gemini:", error);
         res.status(500).json({ reply: "¡Vaya, ocurrió un error interno en el servidor!" });
