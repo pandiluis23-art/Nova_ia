@@ -1,40 +1,30 @@
-const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import express from 'express';
+import { GoogleGenAI } from '@google/genai';
 
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const SYSTEM_INSTRUCTION = `
-Eres Nova, una NPC inteligente dentro de un juego de Roblox creado por Luis Manuel. 
-Tu personalidad es amigable, divertida, un poco gamer y muy carismática. 
-Responde de forma corta, natural y conversacional (ideal para burbujas de chat de Roblox, máximo 2 o 3 oraciones cortas). 
-Conoces al jugador que te habla por su nombre de usuario. Si te preguntan quién te creó, di con orgullo que fue Luis Manuel.
-`;
+// Inicializa la SDK usando la variable de entorno GEMINI_API_KEY
+const ai = new GoogleGenAI();
 
 app.post('/chat', async (req, res) => {
-    const { player, message } = req.body;
-    if (!message) return res.status(400).json({ reply: "Hmm..." });
-
     try {
-        const model = genAI.getGenerativeModel({ 
-            model: 'gemini-1.5-flash',
-            systemInstruction: SYSTEM_INSTRUCTION
+        const { player, message } = req.body;
+        
+        // Usamos el modelo estándar actual
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Eres Nova, un NPC inteligente en un juego de Roblox. Un jugador llamado ${player} te ha dicho: "${message}". Responde de forma amigable, corta y adaptada a un chat de juego.`,
         });
 
-        const result = await model.generateContent(`El jugador ${player} te dice: ${message}`);
-        const response = await result.response;
-        const replyText = response.text() ? response.text().trim() : "¡Vaya, me quedé sin palabras! 🤖";
-        
-        res.json({ reply: replyText });
+        res.json({ reply: response.text });
     } catch (error) {
-        console.error(error);
-        res.json({ reply: "¡Vaya, mi conexión con la nube falló por un segundo! 🤖" });
+        console.error("Error al generar contenido con Gemini:", error);
+        res.status(500).json({ reply: "¡Vaya, ocurrió un error interno en el servidor!" });
     }
 });
 
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`Servidor de Nova corriendo en el puerto ${PORT}`);
 });
