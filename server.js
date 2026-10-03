@@ -4,14 +4,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const app = express();
 app.use(express.json());
 
-// Inicializa con la variable de entorno GEMINI_API_KEY
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/chat', async (req, res) => {
     try {
         const { player, message } = req.body;
         
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        // Usamos gemini-2.0-flash para evitar errores 404
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const prompt = `Eres Nova, un NPC inteligente en un juego de Roblox. Un jugador llamado ${player} te ha dicho: "${message}". Responde de forma amigable, corta y adaptada a un chat de juego.`;
 
