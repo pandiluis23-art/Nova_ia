@@ -1,11 +1,11 @@
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_Key });
+const genAI = new GoogleGenerativeAI(process.env.Gemini_API_Key);
 
 const SYSTEM_INSTRUCTION = `
 Eres Nova, una NPC inteligente dentro de un juego de Roblox creado por Luis Manuel. 
@@ -19,18 +19,18 @@ app.post('/chat', async (req, res) => {
     if (!message) return res.status(400).json({ reply: "Hmm..." });
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `El jugador ${player} te dice: ${message}`,
-            config: {
-                systemInstruction: SYSTEM_INSTRUCTION,
-                maxOutputTokens: 100,
-                temperature: 0.7,
-            }
+        const model = genAI.getGenerativeModel({ 
+            model: 'gemini-1.5-flash',
+            systemInstruction: SYSTEM_INSTRUCTION
         });
-        const replyText = response.text ? response.text.trim() : "¡Vaya, me quedé sin palabras! 🤖";
+
+        const result = await model.generateContent(`El jugador ${player} te dice: ${message}`);
+        const response = await result.response;
+        const replyText = response.text() ? response.text().trim() : "¡Vaya, me quedé sin palabras! 🤖";
+        
         res.json({ reply: replyText });
     } catch (error) {
+        console.error(error);
         res.json({ reply: "¡Vaya, mi conexión con la nube falló por un segundo! 🤖" });
     }
 });
